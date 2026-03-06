@@ -1,20 +1,47 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <title>Mini Search Engine</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quack Search</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-
   <body>
-    <div class="container">
-      <h1>Mini Search Engine</h1>
-
-      <div class="search-box">
-        <input id="searchInput" type="text" placeholder="Search something..." />
-        <button onclick="performSearch()">Quack</button>
+    <!-- ── Home view ─────────────────────────────────── -->
+    <div id="home-view" class="view active">
+      <div class="home-center">
+        <div class="logo">🦆 Quack</div>
+        <div class="search-box">
+          <input
+            id="home-input"
+            type="text"
+            placeholder="Search the web…"
+            autocomplete="off"
+          />
+          <button id="home-btn">Search</button>
+        </div>
       </div>
+    </div>
 
-      <div id="results"></div>
+    <!-- ── Results view ──────────────────────────────── -->
+    <div id="results-view" class="view">
+      <header class="top-bar">
+        <a class="logo-small" href="#" id="logo-back">🦆 Quack</a>
+        <div class="search-box inline">
+          <input
+            id="results-input"
+            type="text"
+            placeholder="Search the web…"
+            autocomplete="off"
+          />
+          <button id="results-btn">Search</button>
+        </div>
+      </header>
+
+      <main class="results-wrap">
+        <div id="results-meta"></div>
+        <div id="results-list"></div>
+      </main>
     </div>
 
     <script src="script.js"></script>

@@ -1,35 +1,209 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #f8f9fa;
+  --white: #ffffff;
+  --border: #dfe1e5;
+  --text: #202124;
+  --muted: #70757a;
+  --url: #1a6e37;
+  --link: #1a0dab;
+  --link-h: #1558d6;
+  --accent: #1a73e8;
+  --red: #d93025;
+  --radius: 8px;
+  --shadow: 0 1px 6px rgba(32, 33, 36, 0.12);
+}
+
 body {
-  font-family: Arial;
-  background: #f5f5f5;
+  font-family: "DM Sans", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
 }
 
-.container {
-  width: 700px;
-  margin: 80px auto;
-  text-align: center;
+/* ── Views ──────────────────────────────────────────── */
+.view {
+  display: none;
+}
+.view.active {
+  display: block;
 }
 
+/* ── Search box (shared) ────────────────────────────── */
+.search-box {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.search-box:focus-within {
+  box-shadow: 0 1px 12px rgba(32, 33, 36, 0.2);
+  border-color: transparent;
+}
 .search-box input {
-  width: 400px;
-  padding: 10px;
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 12px 20px;
   font-size: 16px;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text);
 }
-
 .search-box button {
-  padding: 10px 20px;
-  font-size: 16px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  margin: 4px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.search-box button:hover {
+  background: var(--link-h);
+}
+.search-box button:active {
+  transform: scale(0.97);
 }
 
-.result {
-  background: white;
-  margin-top: 20px;
-  padding: 15px;
-  text-align: left;
-  border-radius: 5px;
+/* ── Home view ──────────────────────────────────────── */
+.home-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 28px;
+  padding: 24px;
+}
+.logo {
+  font-size: 3rem;
+  font-weight: 600;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+#home-view .search-box {
+  width: 100%;
+  max-width: 560px;
 }
 
-.result a {
-  font-size: 18px;
-  color: blue;
+/* ── Results view ───────────────────────────────────── */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 24px;
+}
+.logo-small {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.logo-small:hover {
+  opacity: 0.8;
+}
+
+.search-box.inline {
+  flex: 1;
+  max-width: 600px;
+}
+
+/* ── Results list ───────────────────────────────────── */
+.results-wrap {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 20px 24px 60px;
+}
+
+#results-meta {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.result-card {
+  margin-bottom: 28px;
+}
+.result-url {
+  font-size: 12px;
+  color: var(--url);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.result-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--link);
+  text-decoration: none;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+.result-title:hover {
+  color: var(--link-h);
+  text-decoration: underline;
+}
+
+.result-snippet {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── States ─────────────────────────────────────────── */
+.loading {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 0;
+}
+
+.no-results {
+  padding: 40px 0;
+  color: var(--text);
+}
+.no-results .hint {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.error {
+  padding: 20px;
+  background: #fce8e6;
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--red);
+}
+.error p {
+  margin-top: 6px;
+  color: var(--text);
 }

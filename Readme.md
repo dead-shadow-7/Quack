@@ -6,7 +6,7 @@ A fully self-contained web search engine built from scratch. Quack crawls the we
 
 ## Architecture
 
-![Architecture Diagram](Assets\ArchitectureDiagram.png)
+![Architecture Diagram](./Assets/ArchitectureDiagram.png)
 
 ## Features
 

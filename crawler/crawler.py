@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
+import urllib.robotparser
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from db import documents, visited
@@ -110,7 +111,8 @@ queue_lock      = threading.Lock()
 stats_lock      = threading.Lock()
 queue: deque    = deque((url, 0) for url in SEED_URLS)   # (url, depth)
 queued_set: set = set(SEED_URLS)                          # fast membership test
-
+robots_cache: dict = {}
+robots_lock = threading.Lock()
 stats = {
     "crawled":  0,
     "failed":   0,
@@ -130,6 +132,24 @@ def is_excluded(url: str) -> bool:
     parsed = urlparse(url)
     return any(parsed.path.lower().endswith(ext) for ext in EXCLUDED_EXTENSIONS)
 
+def is_allowed(url: str) -> bool:
+    parsed = urlparse(url)
+    base = f"{parsed.scheme}://{parsed.netloc}"
+    
+    with robots_lock:
+        if base not in robots_cache:
+            rp = urllib.robotparser.RobotFileParser()
+            rp.set_url(f"{base}/robots.txt")
+            try:
+                rp.read()
+            except Exception:
+                rp = None  # if robots.txt unreachable, assume allowed
+            robots_cache[base] = rp
+        rp = robots_cache[base]
+    
+    if rp is None:
+        return True
+    return rp.can_fetch(HEADERS["User-Agent"], url)
 
 def clean_text(soup: BeautifulSoup) -> str:
     """Remove junk tags, then extract plain text."""
@@ -193,6 +213,11 @@ def crawl_url(url: str, depth: int):
             return new_links
 
         if is_excluded(url):
+            with stats_lock:
+                stats["skipped"] += 1
+            return new_links
+
+        if not is_allowed(url):
             with stats_lock:
                 stats["skipped"] += 1
             return new_links

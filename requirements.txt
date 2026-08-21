@@ -1,0 +1,31 @@
+# Quack — Python dependencies (crawler + indexer)
+#
+# Requires Python 3.10+ (the code uses PEP 604 `str | None` and PEP 585
+# `list[str]` / `dict[str, list[str]]` annotations).
+#
+# Install everything from the repo root:
+#     pip install -r requirements.txt
+#
+# The real lists live next to the code they belong to, so each Docker image
+# installs only what it needs (the crawler does not pull in numpy/scipy/nltk):
+#     crawler/requirements.txt   requests, beautifulsoup4, pymongo
+#     indexer/requirements.txt   numpy, scipy, redis, nltk, pymongo
+#
+# Both Python components use flat imports (`from db import ...`), so you must
+# still `cd` into the component directory to run them:
+#     cd crawler  && python crawler.py
+#     cd indexer  && python indexer.py
+#
+# Not installable via pip — start these separately before running the pipeline
+# (or use `docker compose up`, which wires them together for you):
+#     MongoDB  $MONGO_URI    default mongodb://localhost:27017/
+#     Redis    $REDIS_HOST   default localhost:6379
+#
+# The indexer downloads NLTK corpora on first import
+# (indexer/text_processing.py: nltk.download("punkt"), nltk.download("stopwords")),
+# so the first run needs network access. Only "stopwords" is actually used —
+# SnowballStemmer ships inside the nltk package itself. The indexer image
+# pre-bakes this data at build time, so containers need no network for it.
+
+-r crawler/requirements.txt
+-r indexer/requirements.txt

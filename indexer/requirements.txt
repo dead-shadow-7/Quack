@@ -1,0 +1,7 @@
+# indexer/ dependencies only — installed on its own by indexer/Dockerfile.
+# For a combined local install, use the repo-root requirements.txt instead.
+numpy>=1.26.0                   # indexer.py — PageRank vectors
+scipy>=1.11.0                   # indexer.py — sparse link matrix (lil_matrix)
+redis>=5.0.0                    # indexer.py — posting-list staging (idx:* keys)
+nltk>=3.8.1                     # text_processing.py — stopwords + SnowballStemmer
+pymongo>=4.6.0                  # db.py, indexer.py (UpdateOne) — MongoDB driver

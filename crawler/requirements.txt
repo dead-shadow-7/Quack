@@ -1,0 +1,5 @@
+# crawler/ dependencies only — installed on its own by crawler/Dockerfile.
+# For a combined local install, use the repo-root requirements.txt instead.
+requests>=2.31.0                # crawler.py — page fetching
+beautifulsoup4>=4.12.0          # crawler.py — `from bs4 import BeautifulSoup`
+pymongo>=4.6.0                  # db.py — MongoDB driver

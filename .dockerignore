@@ -1,0 +1,25 @@
+# Build context for searchAPI/Dockerfile is the repo root, so keep it lean.
+.git
+.gitignore
+.dockerignore
+**/node_modules
+**/__pycache__
+**/*.py[cod]
+venv
+env
+.env
+.venv
+**/.vscode
+**/.idea
+**/*.swp
+**/*.log
+npm-debug.log*
+Assets
+CLAUDE.md
+Readme.md
+DEPLOY.md
+docker-compose.yml
+**/Dockerfile
+Thumbs.db
+Desktop.ini
+.DS_Store

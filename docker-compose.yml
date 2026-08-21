@@ -1,0 +1,95 @@
+# Quack — full stack on a single box (local dev or one EC2 instance).
+#
+#   docker compose up -d --build        # mongo + redis + api  (the UI is at :3000)
+#   docker compose run --rm crawler     # batch job: fill `documents`
+#   docker compose run --rm indexer     # batch job: build `index`
+#
+# crawler/indexer sit behind the `jobs` profile, so `up` never starts them —
+# they are run-to-completion jobs, not services, and `up` would restart-loop them.
+
+name: quack
+
+services:
+  # ── Data layer ──────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      # Loopback-only: the API reaches Mongo over the compose network, so this
+      # is purely for mongosh/Compass from the host. Never publish 0.0.0.0 on
+      # EC2 — Mongo has no auth configured here.
+      - "127.0.0.1:27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - "127.0.0.1:6379:6379"   # loopback-only, same reasoning as mongo
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── The only long-running service ───────────────────────────────────────────
+  api:
+    build:
+      context: .                       # repo root: the image needs frontend/ too
+      dockerfile: searchAPI/Dockerfile
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://mongo:27017/
+      MONGO_DB: search_engine
+      PORT: "3000"
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy     # server.js exits 1 if Mongo is not up yet
+
+  # ── Batch jobs (profile-gated: `docker compose run --rm <name>`) ────────────
+  crawler:
+    profiles: ["jobs"]
+    build: ./crawler
+    init: true                         # real PID 1, so Ctrl-C stops 64 threads cleanly
+    restart: "no"                      # runs to completion, then exits
+    environment:
+      MONGO_URI: mongodb://mongo:27017/
+      MONGO_DB: search_engine
+    depends_on:
+      mongo:
+        condition: service_healthy     # db.py calls create_index() at import time
+
+  indexer:
+    profiles: ["jobs"]
+    build: ./indexer
+    init: true
+    restart: "no"
+    # Phase 1 holds every document's tokens in RAM at once. Raise this if the
+    # corpus grows — an OOM-kill here loses the whole run. Note Phase 3 drops
+    # the `index` collection first, so search returns nothing while this runs.
+    mem_limit: 4g
+    environment:
+      MONGO_URI: mongodb://mongo:27017/
+      MONGO_DB: search_engine
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
+  redis-data:

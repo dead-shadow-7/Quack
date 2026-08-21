@@ -1,4 +1,9 @@
-const API = "http://localhost:3000";
+// Served by the API container → same origin, so a relative path is correct.
+// Opened straight off disk (file://) → fall back to the local dev server.
+// Override at runtime with `window.QUACK_API = "https://…"` before this script.
+const API =
+  window.QUACK_API ??
+  (location.protocol === "file:" ? "http://localhost:3000" : "");
 
 // ── View switching ─────────────────────────────────────────────────────────────
 function showView(name) {

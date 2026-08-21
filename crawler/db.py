@@ -1,7 +1,13 @@
+import os
+
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["search_engine"]
+# Overridable for Docker/AWS; the defaults are the original local values.
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_DB  = os.environ.get("MONGO_DB",  "search_engine")
+
+client = MongoClient(MONGO_URI)
+db = client[MONGO_DB]
 
 documents = db["documents"]
 visited   = db["visited"]
